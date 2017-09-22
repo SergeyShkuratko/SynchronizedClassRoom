@@ -1,12 +1,10 @@
 package com.company;
 
-import java.util.concurrent.ForkJoinPool;
-
 public class Main {
     volatile static int seconds = 0;
 
     public static void main(String[] args) {
-        Object locker = new Object();
+        final Object locker = new Object();
         new Thread(() -> {
             while (true) {
                 System.out.println(seconds);
@@ -21,39 +19,17 @@ public class Main {
                 seconds++;
             }
         }).start();
-
-        new Messager(7, locker).start();
-        new Messager(5, locker).start();
-
-        //messager1.run();
-        //messager2.run();
-//        new Thread(() -> {
-//            boolean printed = false;
-//            while (true) {
-//                if (seconds % 5 != 0) {
-//                    synchronized (locker) {
-//                        try {
-//                            printed = false;
-//                            locker.wait();
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                } else {
-//                    if (!printed) {
-//                        System.out.println("Прошло 5 секунд");
-//                        printed = true;
-//                    }
-//                }
-//            }
-//        }).start();
+        System.out.println("start first");
+        new Messenger(7, locker).start();
+        System.out.println("start second");
+        new Messenger(5, locker).start();
     }
 
-    static class Messager extends Thread {
+    static class Messenger extends Thread {
         int secondDelay;
-        Object locker;
+        final Object locker;
 
-        public Messager(int secondDelay, Object locker) {
+        public Messenger(int secondDelay, Object locker) {
             this.secondDelay = secondDelay;
             this.locker = locker;
         }
