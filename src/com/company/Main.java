@@ -19,13 +19,23 @@ public class Main {
                 seconds++;
             }
         }).start();
-        System.out.println("start first");
-        new Messenger(7, locker).start();
-        System.out.println("start second");
-        new Messenger(5, locker).start();
+        Messenger messenger = new Messenger(7, locker);
+        Messenger messenger1 = new Messenger(5, locker);
+
+//IT IS WORK
+//        new Thread(messenger).start();
+//        new Thread(messenger1).start();
+//
+// IT IS NOT WORK
+//        messenger.run();
+//        System.out.println("After first run"); //this message is not write on console
+//        messenger1.run();
+
+
     }
 
-    static class Messenger extends Thread {
+
+    static class Messenger implements Runnable {
         int secondDelay;
         final Object locker;
 
@@ -35,8 +45,8 @@ public class Main {
         }
 
         @Override
-        public synchronized void start() {
-            System.out.println("second deley" + secondDelay);
+        public synchronized void run() {
+            System.out.println("seconds delay " + secondDelay);
             boolean printed = false;
             while (true) {
                 if (seconds % secondDelay != 0) {
