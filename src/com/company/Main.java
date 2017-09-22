@@ -1,13 +1,16 @@
 package com.company;
 
 public class Main {
-    volatile static int seconds = 0;
+//    volatile static int seconds = 0;
+
 
     public static void main(String[] args) {
+        CounterWrapper counterWrapper = new CounterWrapper();
+
         final Object locker = new Object();
         new Thread(() -> {
             while (true) {
-                System.out.println(seconds);
+                System.out.println(counterWrapper.getCounter());
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -16,15 +19,15 @@ public class Main {
                 synchronized (locker) {
                     locker.notifyAll();
                 }
-                seconds++;
+                counterWrapper.add();
             }
         }).start();
-        Messenger messenger = new Messenger(7, locker);
-        Messenger messenger1 = new Messenger(5, locker);
+        Messenger messenger = new Messenger(7, locker, counterWrapper);
+        Messenger messenger1 = new Messenger(5, locker, counterWrapper);
 
 //IT IS WORK
-//        new Thread(messenger).start();
-//        new Thread(messenger1).start();
+        new Thread(messenger).start();
+        new Thread(messenger1).start();
 //
 // IT IS NOT WORK
 //        messenger.run();
@@ -38,10 +41,12 @@ public class Main {
     static class Messenger implements Runnable {
         int secondDelay;
         final Object locker;
+        CounterWrapper counterWrapper;
 
-        public Messenger(int secondDelay, Object locker) {
+        public Messenger(int secondDelay, Object locker, CounterWrapper counterWrapper) {
             this.secondDelay = secondDelay;
             this.locker = locker;
+            this.counterWrapper = counterWrapper;
         }
 
         @Override
@@ -49,7 +54,7 @@ public class Main {
             System.out.println("seconds delay " + secondDelay);
             boolean printed = false;
             while (true) {
-                if (seconds % secondDelay != 0) {
+                if (counterWrapper.getCounter() % secondDelay != 0) {
                     synchronized (locker) {
                         try {
                             printed = false;
